@@ -37,7 +37,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 	})
 	MiscGroupbox:AddToggle('VoidWalkerNotifier', {
 		Text = 'Void Walker Notifier',
-		Default = false,
+		Default = true,
 	})
 	local players = game:GetService("Players")
 	local localPlayer = players.LocalPlayer
