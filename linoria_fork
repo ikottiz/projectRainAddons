@@ -3017,19 +3017,21 @@ function Library:UseWindow(...)
                     for _, TabButtonHere in next, TabArea:GetChildren() do
                         if TabButtonHere ~= v and TabButtonHere.ClassName == "Frame" then
                             TabButtonHere.BackgroundColor3 = Library.BackgroundColor;
-                            TabButtonHere.TextColor3 = Library.FontColor;
                             for _,v in next, TabButtonHere:GetChildren() do
                                 if v.Size == UDim2.new(1, 0, 0, 1) then
                                     v.BackgroundTransparency = 1
+                                elseif v.ClassName == "TextLabel" then
+                                    v.TextColor3 = Library.FontColor;
                                 end
                             end
                         elseif TabButtonHere == v then
                             for _,v in next, TabButtonHere:GetChildren() do
                                 if v.Size == UDim2.new(1, 0, 0, 1) then
                                     v.BackgroundTransparency = 0
+                                elseif v.ClassName == "TextLabel" then
+                                    v.TextColor3 = Library.AccentColor;
                                 end
                             end
-                            v.TextColor3 = Library.AccentColor;
                             v.BackgroundColor3 = Library.MainColor
                         end
                     end
