@@ -21,7 +21,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 	Library.TabContainer = TabContainer
 	Library.Outer = Outer
 	Library.TabListLayout = TabListLayout
-	Library.TabArea = TabArea
+	Library.TabArea = TabArea --SET THIS VARIABLES IN ORDER Library -> TabContainer and other things -> Window
 	local Window = Library:UseWindow()
     local Tabs = {
 		Addon = Window:AddTab('Addons Test'),
