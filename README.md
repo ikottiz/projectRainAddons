@@ -25,9 +25,12 @@ if (TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~=
         local Tabs = {
 		ESP = Window:AddTab('Addons Test'),
 	}
-  local Groupbox = ESP:AddRightGroupbox("Test!")
-  Groupbox:AddButton({Text = "Test!",Func = function()
-        Library:Notify('You clicked a button!')
-    end,)
+	local Groupbox = ESP:AddRightGroupbox("Test!")
+	Groupbox:AddButton({
+		Text = "Test!",
+		Func = function()
+			Library:Notify('You clicked a button!')
+		end
+	end})
 end
 ```
