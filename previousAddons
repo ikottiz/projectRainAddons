@@ -635,9 +635,8 @@ do --script part
         }
         local espConnection = runService.RenderStepped:Connect(function()
             if Toggles.PlayerESP.Value then
-                local character = targetPlayer.Character
-                if character then
-                    local humanoid,humanoidRootPart = character:FindFirstChildOfClass("Humanoid"),character:FindFirstChild("HumanoidRootPart")
+                if targetPlayer then
+                    local humanoid,humanoidRootPart = targetPlayer:FindFirstChildOfClass("Humanoid"),targetPlayer:FindFirstChild("HumanoidRootPart")
                     if humanoid and humanoidRootPart and humanoid.Health > 0 then
                         local distance = math.floor(localPlayer:DistanceFromCharacter(humanoidRootPart.Position))
                         if distance <= Options.PlayerESPDistance.Value then
@@ -736,34 +735,25 @@ do --script part
             end
         end)
     end
-    for _,v in pairs(players:GetChildren()) do
-        if v == localPlayer then
+    for _,v in pairs(game.Workspace.Live:GetChildren()) do
+        if v == localPlayer.Character or v:FindFirstChild("SpawnCF")then
             continue
         end
-        local targetPlayer = v
-        local targetCharacter = v.Character
-        if targetCharacter then
-            if targetCharacter:FindFirstChild("Humanoid") and targetCharacter:FindFirstChild("HumanoidRootPart") then
+        if v then
+            if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
                 esp(v)
             end
         end
-        targetPlayer.CharacterAdded:Connect(function(character)
-            local humanoid,rootPart = character:FindFirstChild("Humanoid"),character:FindFirstChild("HumanoidRootPart")
-            if humanoid and rootPart then
-                esp(targetPlayer)
-            end
-        end)
     end
-    players.ChildAdded:Connect(function(targetPlayer)
-        if targetPlayer == localPlayer then 
+    game.Workspace.Live.ChildAdded:Connect(function(targetPlayer)
+        if targetPlayer == localPlayer.Character or targetPlayer:FindFirstChild("SpawnCF")then
             return
         end
-        targetPlayer.CharacterAdded:Connect(function(character)
-            local humanoid,rootPart = character:FindFirstChild("Humanoid"),character:FindFirstChild("HumanoidRootPart")
-            if humanoid and rootPart then
+        if targetPlayer then
+            if targetPlayer:FindFirstChild("Humanoid") and targetPlayer:FindFirstChild("HumanoidRootPart") then
                 esp(targetPlayer)
             end
-        end)
+        end
     end)
     --ingredient esp
     local function ingredient_esp(object)
@@ -842,7 +832,7 @@ do --script part
         local espConnection = runService.RenderStepped:Connect(function()
             if Toggles.ChestESP.Value then
                 local distance = math.floor(localPlayer:DistanceFromCharacter(object.Position))
-                if object then
+                if object and object.Parent then
                     if distance <= Options.ChestESPDistance.Value then
                         local screenPosition, onScreen = camera:WorldToViewportPoint(object.Position)
                         local orientation = object.CFrame
