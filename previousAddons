@@ -521,13 +521,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 									espObjects.text.Visible = onScreen
 									espObjects.text.Position = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), 
 									((screenPosition.Y + espObjects.box.Size.Y / 2)))
-									local leaderstats = targetPlayer:FindFirstChild('leaderstats')
 									espObjects.text.Text = targetPlayer.Name
-									if leaderstats then
-										local firstName = leaderstats:FindFirstChild('FirstName').Value
-										local lastName = leaderstats:FindFirstChild('LastName').Value
-										espObjects.text.Text = espObjects.text.Text..("| %s %s"):format(firstName,lastName)
-									end
 									espObjects.text.Size = Options.PlayerTextSize.Value
 									espObjects.text.Transparency = Options.PlayerTextTransparency.Value
 									espObjects.text.Color = Options.PlayerTextColor.Value
@@ -549,7 +543,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 										espObjects.health_outline.Thickness = Options.PlayerHealthbarOutlineThickness.Value
 										espObjects.health_outline.Size = Vector2.new(espObjects.health_main.Size.X, espObjects.box.Size.Y)
 										espObjects.health_outline.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
-										(espObjects.box.Position.Y - espObjects.box.Size.Y))
+										(espObjects.box.Position.Y + espObjects.box.Size.Y))
 										espObjects.health_main.Visible = onScreen
 										espObjects.health_outline.Visible = espObjects.health_main.Visible
 									else
@@ -614,7 +608,6 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 			local targetPlayer = v
 			local targetCharacter = v.Character
 			if targetCharacter then
-				wait(1)
 				if targetCharacter:FindFirstChild("Humanoid") and targetCharacter:FindFirstChild("HumanoidRootPart") then
 					esp(v)
 				end
@@ -622,7 +615,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 			targetPlayer.CharacterAdded:Connect(function(character)
 				character:WaitForChild("Humanoid")
 				character:WaitForChild("HumanoidRootPart")
-				esp(v)
+				esp(targetPlayer)
 			end)
 		end
 		players.ChildAdded:Connect(function(targetPlayer)
