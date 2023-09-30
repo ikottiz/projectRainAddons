@@ -1,0 +1,3 @@
+getgenv().mobNames = {
+    ["Drago"] = "Kaido",
+}
