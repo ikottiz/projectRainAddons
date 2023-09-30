@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 local Outer,TabContainer,TabListLayout,TabArea
 --shitty method but this works
 for _,v in ipairs(game:GetService("CoreGui").ScreenGui:GetDescendants()) do
@@ -526,6 +527,110 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 		Text = 'Display Artifact ESP Distance',
 		Default = true,
 	})
+	--whirlpool esp
+	MiscESP:AddToggle('WhirlpoolESP', {
+		Text = 'Whirlpool ESP',
+		Default = false,
+	}):AddKeyPicker('ESPKeypicker', {
+		Default = 'F1',
+		SyncToggleState = true,
+		Mode = 'Toggle',
+		Text = 'Whirlpool ESP',
+		NoUI = false,
+	})
+	local WhirlpoolESPDepBox = MiscESP:AddDependencyBox();
+	WhirlpoolESPDepBox:SetupDependencies({
+		{ Toggles.WhirlpoolESP, true }
+	});
+	WhirlpoolESPDepBox:AddSlider('WhirlpoolESPDistance', {
+		Text = 'Whirlpool ESP Distance',
+		Default = 1000,
+		Min = 0,
+		Max = 60000,
+		Rounding = 0,
+		Compact = false,
+	})
+	WhirlpoolESPDepBox:AddSlider('WhirlpoolESPTextSize', {
+		Text = 'Whirlpool ESP Text Size',
+		Default = 15,
+		Min = 0,
+		Max = 50,
+		Rounding = 0,
+		Compact = false,
+	})
+	WhirlpoolESPDepBox:AddSlider('WhirlpoolESPTextTransparency', {
+		Text = 'Whirlpool ESP Text Transparency',
+		Default = 1,
+		Min = 0,
+		Max = 1,
+		Rounding = 1,
+		Compact = false,
+	})
+	WhirlpoolESPDepBox:AddLabel("Whirlpool ESP Text Color"):AddColorPicker('WhirlpoolESPTextColor', {
+		Default = Color3.fromRGB(255,255,255),
+		Title = 'Whirlpool ESP Text Color',
+		Transparency = nil,
+	})
+	WhirlpoolESPDepBox:AddToggle('WhirlpoolESPTextOutline', {
+		Text = 'Whirlpool ESP Text Outline',
+		Default = true,
+	})
+	WhirlpoolESPDepBox:AddToggle('WhirlpoolESPDistance', {
+		Text = 'Display Whirlpool ESP Distance',
+		Default = true,
+	})
+	--crate esp
+	MiscESP:AddToggle('CrateESP', {
+		Text = 'Crate ESP',
+		Default = false,
+	}):AddKeyPicker('ESPKeypicker', {
+		Default = 'F1',
+		SyncToggleState = true,
+		Mode = 'Toggle',
+		Text = 'Crate ESP',
+		NoUI = false,
+	})
+	local CrateESPDepBox = MiscESP:AddDependencyBox();
+	CrateESPDepBox:SetupDependencies({
+		{ Toggles.CrateESP, true }
+	});
+	CrateESPDepBox:AddSlider('CrateESPDistance', {
+		Text = 'Crate ESP Distance',
+		Default = 1000,
+		Min = 0,
+		Max = 60000,
+		Rounding = 0,
+		Compact = false,
+	})
+	CrateESPDepBox:AddSlider('CrateESPTextSize', {
+		Text = 'Crate ESP Text Size',
+		Default = 15,
+		Min = 0,
+		Max = 50,
+		Rounding = 0,
+		Compact = false,
+	})
+	CrateESPDepBox:AddSlider('CrateESPTextTransparency', {
+		Text = 'Crate ESP Text Transparency',
+		Default = 1,
+		Min = 0,
+		Max = 1,
+		Rounding = 1,
+		Compact = false,
+	})
+	CrateESPDepBox:AddLabel("Crate ESP Text Color"):AddColorPicker('CrateESPTextColor', {
+		Default = Color3.fromRGB(255,255,255),
+		Title = 'Crate ESP Text Color',
+		Transparency = nil,
+	})
+	CrateESPDepBox:AddToggle('CrateESPTextOutline', {
+		Text = 'Crate ESP Text Outline',
+		Default = true,
+	})
+	CrateESPDepBox:AddToggle('CrateESPDistance', {
+		Text = 'Display Crate ESP Distance',
+		Default = true,
+	})
 	do --script part
 		function draw(type, properties)
 			local drawing = Drawing.new(type)
@@ -578,8 +683,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 									espObjects.text.Transparency = Options.PlayerTextTransparency.Value
 									espObjects.text.Color = Options.PlayerTextColor.Value
 									espObjects.text.Outline = Toggles.PlayerOutline.Value
-			
-			
+					
 									if Toggles.PlayerDistance.Value then
 										espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
 									end
@@ -813,7 +917,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
  		end
 		game.Workspace.Thrown.ChildAdded:Connect(function(v)
 			if v.Name == "Model" then
-				local lid = v:WaitForChild("Lid")
+				local lid = v:FindFirstChild("Lid")
 				if lid ~= nil then
 					chest_esp(lid)
 				end
@@ -898,7 +1002,6 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
                 mob_esp(v)
             end
         end
-
         game:GetService("Workspace").Live.DescendantAdded:Connect(function(child)
             if child.Name == "HumanoidRootPart" and child.Parent:FindFirstChild("SpawnCF") and child.Parent:FindFirstChild("Target") then
                 mob_esp(child.Parent)
@@ -1201,5 +1304,152 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 				end
 			end
 		end)
+		--crate esp
+		local function crate_esp(object)
+			if Library.Unloaded then
+				return
+			end
+			local espObjects = {
+				text = draw("Text", {Color = Color3.fromRGB(255, 255, 255),Font = 2, Center = true, Outline = true, ZIndex = 1, Size = 13,Transparency = 0.75}),
+			}
+			local espConnection = runService.RenderStepped:Connect(function()
+				if Toggles.CrateESP.Value then
+					local rootPart = object:FindFirstChildOfClass("BasePart") or object
+					if rootPart then
+						local distance = math.floor(localPlayer:DistanceFromCharacter(rootPart.Position))
+						if distance <= Options.CrateESPDistance.Value then
+							local screenPosition, onScreen = camera:WorldToViewportPoint(object.Position)
+							local orientation = object.CFrame
+							local height = (camera.CFrame - camera.CFrame.Position) * Vector3.new(0, 2.75, 0)
+							local screenHeight = math.abs(camera:WorldToScreenPoint(orientation.Position + height).Y - camera:WorldToScreenPoint(orientation.Position - height).Y)
+							local boxSize = round(Vector2.new(screenHeight / 2, screenHeight))
+							if espObjects.text ~= nil then
+								espObjects.text.Visible = onScreen
+								espObjects.text.Position = round(Vector2.new(screenPosition.X, screenPosition.Y) - (boxSize / 2))
+								espObjects.text.Text = "Crate"
+								espObjects.text.Size = Options.CrateESPTextSize.Value
+								espObjects.text.Transparency = Options.CrateESPTextTransparency.Value
+								espObjects.text.Color = Options.CrateESPTextColor.Value
+								espObjects.text.Outline = Toggles.CrateESPTextOutline.Value
+
+								if Toggles.CrateESPDistance.Value then
+									espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
+								end
+							end
+						else
+							for index, object in next, espObjects do
+								object.Visible = false
+							end
+						end
+					else
+						for index, object in next, espObjects do
+							object.Visible = false
+							object:Remove()
+							espObjects[index] = nil
+						end
+					end
+				else
+					for index, object in next, espObjects do
+						object.Visible = false
+					end
+				end
+			end)
+			Library:GiveSignal(espConnection)
+			runService.Stepped:Connect(function()
+				if not espConnection.Connected then
+					for index, object in next, espObjects do
+						object.Visible = false
+						object:Remove()
+						espObjects[index] = nil
+					end
+				end
+			end)
+		end
+		for _,v in pairs(game.Workspace.Map:GetChildren()) do
+			if v.Name == "ExplodeCrate" then
+				crate_esp(v)
+			end
+		end
+		game.Workspace.Map.ChildAdded:Connect(function(v)
+			if v.Name == "ExplodeCrate" then
+				crate_esp(v)
+			end
+		end)
+		--whirlpool esp
+		--[[
+		local function whirlpool_esp(object)
+			if Library.Unloaded then
+				return
+			end
+			local espObjects = {
+				text = draw("Text", {Color = Color3.fromRGB(255, 255, 255),Font = 2, Center = true, Outline = true, ZIndex = 1, Size = 13,Transparency = 0.75}),
+			}
+			local espConnection = runService.RenderStepped:Connect(function()
+				if Toggles.WhirlpoolESP.Value then
+					local rootPart = object.PrimaryPart or object:FindFirstChildOfClass("BasePart")
+					if rootPart then
+						local distance = math.floor(localPlayer:DistanceFromCharacter(rootPart.Position))
+						if distance <= Options.WhirlpoolESPDistance.Value then
+							local screenPosition, onScreen = camera:WorldToViewportPoint(object.Position)
+							local orientation = object.CFrame
+							local height = (camera.CFrame - camera.CFrame.Position) * Vector3.new(0, 2.75, 0)
+							local screenHeight = math.abs(camera:WorldToScreenPoint(orientation.Position + height).Y - camera:WorldToScreenPoint(orientation.Position - height).Y)
+							local boxSize = round(Vector2.new(screenHeight / 2, screenHeight))
+							if espObjects.text ~= nil then
+								espObjects.text.Visible = onScreen
+								espObjects.text.Position = round(Vector2.new(screenPosition.X, screenPosition.Y) - (boxSize / 2))
+								espObjects.text.Text = "Whirlpool"
+								espObjects.text.Size = Options.WhirlpoolESPTextSize.Value
+								espObjects.text.Transparency = Options.WhirlpoolESPTextTransparency.Value
+								espObjects.text.Color = Options.WhirlpoolESPTextColor.Value
+								espObjects.text.Outline = Toggles.WhirlpoolESPTextOutline.Value
+
+								if Toggles.WhirlpoolESPDistance.Value then
+									espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
+								end
+							end
+						else
+							for index, object in next, espObjects do
+								object.Visible = false
+							end
+						end
+					else
+						for index, object in next, espObjects do
+							object.Visible = false
+							object:Remove()
+							espObjects[index] = nil
+						end
+					end
+				else
+					for index, object in next, espObjects do
+						object.Visible = false
+					end
+				end
+			end)
+			Library:GiveSignal(espConnection)
+			runService.Stepped:Connect(function()
+				if not espConnection.Connected then
+					for index, object in next, espObjects do
+						object.Visible = false
+						object:Remove()
+						espObjects[index] = nil
+					end
+				end
+			end)
+		end
+		for _,v in pairs(game.Workspace.Thrown:GetChildren()) do
+			if v.Name == "PieceOfForge" then
+				whirlpool_esp(v)
+			end
+		end
+		game.Workspace.Thrown.ChildAdded:Connect(function(v)
+			if v.Name == "PieceOfForge" then
+				local part = v.PrimaryPart
+				if part ~= nil then
+					whirlpool_esp(v)
+				end
+			end
+		end)
+		]]--
 	end
 end
