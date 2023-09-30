@@ -815,7 +815,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 			if v.Name == "Model" then
 				local lid = v:WaitForChild("Lid")
 				if lid ~= nil then
-					chest_esp(v)
+					chest_esp(lid)
 				end
 			end
 		end)
