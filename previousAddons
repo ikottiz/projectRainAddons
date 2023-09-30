@@ -1196,7 +1196,7 @@ if TabListLayout ~= nil and Outer ~= nil and TabArea ~= nil and TabContainer ~= 
 		game.Workspace.Thrown.ChildAdded:Connect(function(v)
 			if v.Name == "PieceOfForge" then
 				local part = v.PrimaryPart
-				if lid ~= nil then
+				if part ~= nil then
 					artifact_esp(v)
 				end
 			end
