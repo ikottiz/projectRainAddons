@@ -3,7 +3,7 @@
 ### Extra ESP
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ikottiz/projectRainAddons/main/previousAddons"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ikottiz/projectRainAddons/main/extraESP"))()
 ```
 ## Features
 
