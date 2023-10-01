@@ -923,7 +923,7 @@ if getgenv().Rain then
 			end
 		end
 		game:GetService("Workspace").Live.DescendantAdded:Connect(function(child)
-			if child.Name == "HumanoidRootPart" and child.Parent:FindFirstChild("SpawnCF") and child.Parent:FindFirstChild("Target") then
+			if child.Name == "SpawnCF" and child.Parent then
 				mob_esp(child.Parent)
 			end
 		end)
