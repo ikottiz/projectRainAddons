@@ -1,0 +1,28 @@
+local Tab = getgenv().Rain.Tabs["Addons"]
+local LeftGroupBoxAddon = Tab:AddLeftGroupbox("Charisma Auto-Complete")
+
+LeftGroupBoxAddon:AddToggle('CharismaAutofarm', {
+    Text = 'Charisma Auto-Complete',
+    Default = false,
+    Tooltip = 'Toggles the auto charisma.',
+})
+local Player = game.Players.LocalPlayer
+local PlayerGui = game.Players.LocalPlayer.PlayerGui
+PlayerGui.ChildAdded:Connect(function(Child)
+	if Toggles.CharismaAutofarm.Value then
+        if Child:FindFirstChild("ChoiceFrame") and Child:FindFirstChild("ChoiceClient") then
+			local ChoiceFrame = Child:FindFirstChild("ChoiceFrame")
+			local TextBox = ChoiceFrame:FindFirstChild("TextBox")
+			local TextLabel = ChoiceFrame:FindFirstChildWhichIsA("TextLabel")
+			local Phrase = TextLabel.Text
+			TextBox:CaptureFocus()
+			wait(math.random(1,2))
+			TextBox.Text = 
+				string.gsub(
+					string.split(Phrase,".")[2]
+					,"'","")
+			wait(math.random(1,2))
+			firesignal(TextBox.FocusLost,true)
+        end
+	end
+end)
