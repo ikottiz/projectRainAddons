@@ -17,6 +17,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/ikottiz/projectRainAd
 - ### Tracers Thickness
 - ### Tracers Color
 ### Text
+- ### Name Spoof with streamer mode
 - ### Text Transparency
 - ### Text Color
 - ### Distance
