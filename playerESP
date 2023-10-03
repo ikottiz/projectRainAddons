@@ -1,0 +1,309 @@
+if getgenv().Rain then
+	--ui
+    getgenv().Tabs = {}
+    getgenv().Addon = Addon or getgenv().Rain.Window:AddTab("ESP")
+    getgenv().PlayerESP = PlayerESP or Addon:AddLeftGroupbox('Player ESP')
+    --player esp
+    PlayerESP:AddToggle('PlayerESP', {
+        Text = 'Player ESP',
+        Default = true,
+    }):AddKeyPicker('ESPKeypicker', {
+        Default = 'F1',
+        SyncToggleState = true,
+        Mode = 'Toggle',
+        Text = 'Player ESP',
+        NoUI = false,
+    })
+    PlayerESP:AddToggle('LocalPlayer', {
+        Text = 'Local ESP',
+        Default = false,
+    })
+    PlayerESP:AddLabel("Player ESP Text Color"):AddColorPicker('PlayerTextColor', {
+        Default = Color3.fromRGB(255,255,255),
+        Title = 'Player ESP Text Color',
+        Transparency = nil,
+    })
+    PlayerESP:AddSlider('PlayerESPDistance', {
+        Text = 'Player ESP Distance',
+        Default = 10000,
+        Min = 0,
+        Max = 60000,
+        Rounding = 0,
+        Compact = false,
+    })
+    PlayerESP:AddToggle('PlayerBoxes', {
+        Text = 'Player ESP Boxes',
+        Default = false,
+    })
+    PlayerESP:AddToggle('PlayerBoxFilled', {
+        Text = 'Player ESP Boxes Filled',
+        Default = false,
+    })
+    PlayerESP:AddSlider('PlayerBoxesTransparency', {
+        Text = 'Player ESP Boxes Transparency',
+        Default = 1,
+        Min = 0,
+        Max = 1,
+        Rounding = 1,
+        Compact = false,
+    })
+    PlayerESP:AddLabel("Player ESP Boxes Color"):AddColorPicker('PlayerBoxesColor', {
+        Default = Color3.fromRGB(255,255,255),
+        Title = 'Player ESP Box Color',
+        Transparency = nil,
+    })
+    PlayerESP:AddToggle('PlayerOutline', {
+        Text = 'Player ESP Text Outline',
+        Default = true,
+    })
+    PlayerESP:AddSlider('PlayerTextSize', {
+        Text = 'Player ESP Text Size',
+        Default = 15,
+        Min = 0,
+        Max = 50,
+        Rounding = 0,
+        Compact = false,
+    })
+    PlayerESP:AddToggle('PlayerDistance', {
+        Text = 'Display Player Distance',
+        Default = true,
+    })
+    PlayerESP:AddToggle('PlayerHealthText', {
+        Text = 'Display Player Health',
+        Default = true,
+    })
+    PlayerESP:AddSlider('PlayerTextTransparency', {
+        Text = 'Player ESP Text Transparency',
+        Default = 1,
+        Min = 0,
+        Max = 1,
+        Rounding = 1,
+        Compact = false,
+    })
+    PlayerESP:AddToggle('PlayerTracers', {
+        Text = 'Player Tracers',
+        Default = false,
+    })
+    PlayerESP:AddLabel("Player Tracers Color"):AddColorPicker('PlayerTracersColor', {
+        Default = Color3.fromRGB(255,255,255),
+        Title = 'ESP Text Color',
+        Transparency = nil,
+    })
+    PlayerESP:AddSlider('PlayerTracersTransparency', {
+        Text = 'Player Tracers Transparency',
+        Default = 1,
+        Min = 0,
+        Max = 1,
+        Rounding = 1,
+        Compact = false,
+    })
+    PlayerESP:AddSlider('PlayerTracersThickness', {
+        Text = 'Player Tracers Thickness',
+        Default = 1,
+        Min = 1,
+        Max = 10,
+        Rounding = 1,
+        Compact = false,
+    })
+    PlayerESP:AddToggle('PlayerHealthbar', {
+        Text = 'Players Healthbar',
+        Default = true,
+    })
+    PlayerESP:AddLabel("Player Healthbar Color"):AddColorPicker('PlayerHealthbarColor', {
+        Default = Color3.fromRGB(90,131,83),
+        Title = 'ESP Text Color',
+        Transparency = nil,
+    })
+    PlayerESP:AddLabel("Player Healthbar Outline Color"):AddColorPicker('PlayerHealthbarOutlineColor', {
+        Default = Color3.fromRGB(255,255,255),
+        Title = 'ESP Text Color',
+        Transparency = nil,
+    })
+    PlayerESP:AddSlider('PlayerHealthbarTransparency', {
+        Text = 'Player Healthbar Transparency',
+        Default = 1,
+        Min = 0,
+        Max = 1,
+        Rounding = 1,
+        Compact = false,
+    })
+    PlayerESP:AddSlider('PlayerHealthbarOutlineThickness', {
+        Text = 'Player Healthbar Outline Thickness',
+        Default = 1,
+        Min = 1,
+        Max = 10,
+        Rounding = 1,
+        Compact = false,
+    })
+	--variables
+	local streamerNames1 = {"Fancy","Nice","Dumb","Cool","Vainglorious","Funny","Young","Old","Elder","Fat","Skinny"}
+	local streamerNames2 = {"Apple","Brainsucker","Cock","Dawnwalker","Eagle","Furry","Ginger","Hitler","Ion","Joke","Kiddo","Loser","Mother","Nword","Opp","Perv","Quest","Rally","Stuart","T-Rex","University","Vigils","Word","X","You","Zaza"}
+	local players = cachedServices["Players"]
+	local localPlayer = players.LocalPlayer
+	local camera = workspace.CurrentCamera
+	local userInputService = game:GetService("UserInputService")
+	local runService = game:GetService("RunService")
+	function draw(type, properties)
+		local drawing = Drawing.new(type)
+		for i, v in next, properties do
+			drawing[i] = v
+		end
+		return drawing
+	end
+	function round(vector)
+		return Vector2.new(vector.x - vector.x % 1, vector.y - vector.y % 1)
+	end
+	local esp = {}
+	esp.IsAPlayer = function(object)
+		local Parent = object.Parent
+		if Parent then
+			if Parent == game:GetService("Workspace").Live then
+				if not object:FindFirstChild("SpawnCF") then 
+					return true
+				end
+			end
+			return false
+		end
+		return false
+	end
+    local playerExists = function(player)
+        for i,v in next, cachedServices["Players"]:GetChildren() do
+            if v.Name == player.Name then
+                return true
+            end
+        end
+        return false
+    end
+    --esp
+    esp.drawPlayer = function(player)
+        if rainlibrary.Unloaded or player.Name:find("%.") ~= nil then
+            return
+        end
+        local streamerName = math.random(0,9).."_"..streamerNames1[math.random(1,#streamerNames1)]..streamerNames2[math.random(1,#streamerNames2)]
+        local espObjects = {}
+        espObjects.tracer = draw("Line", {Color = Color3.fromRGB(255, 255, 255), ZIndex = 1, Transparency = 0.5})
+        espObjects.text = draw("Text", {Color = Color3.fromRGB(255, 255, 255),Font = 2, Center = true, Outline = true, ZIndex = 1, Size = 13,Transparency = 0.75})
+        espObjects.box = draw("Square", {Color = Color3.fromRGB(255, 255, 255), Thickness = 1.5, ZIndex = 1})
+        espObjects.health_main = draw("Square", {Color = Color3.fromRGB(0, 0, 0), Thickness = 1.5, ZIndex = 1, Filled = true})
+        espObjects.health_outline = draw("Square", {Color = Color3.fromRGB(0, 0, 0),ZIndex = 2, Filled = false})
+        local espConnection = runService.RenderStepped:Connect(function()
+            if rainlibrary.Unloaded then
+                return
+            end
+            if player and playerExists(player) then
+                if player == localPlayer.Character and not Toggles.LocalPlayer.Value then
+                    for index, object in next, espObjects do
+                        object.Visible = false
+                    end
+                end
+                local humanoid,rootPart = player:FindFirstChildOfClass("Humanoid"),player:FindFirstChild("HumanoidRootPart") or player.PrimaryPart or player:FindFirstChildOfClass("Part")
+                if humanoid and rootPart and humanoid.Health > 0 then
+                    local distance = math.floor(localPlayer:DistanceFromCharacter(rootPart.Position))
+                    local requiredDistance = Options.PlayerESPDistance.Value
+                    if distance <= requiredDistance then
+                        local screenPosition, onScreen = camera:WorldToViewportPoint(rootPart.Position)
+                        local orientation = rootPart.CFrame
+                        local height = (camera.CFrame - camera.CFrame.Position) * Vector3.new(0, 2.75, 0)
+                        local screenHeight = math.abs(camera:WorldToScreenPoint(orientation.Position + height).Y - camera:WorldToScreenPoint(orientation.Position - height).Y)
+                        local boxSize = round(Vector2.new(screenHeight / 2, screenHeight))
+                        local health_percent = (humanoid.Health / humanoid.MaxHealth)
+    
+                        if espObjects.box ~= nil then              
+                            if Toggles.PlayerESP.Value then
+                                espObjects.box.Visible = onScreen
+                                espObjects.box.Color = Options.PlayerBoxesColor.Value
+                                espObjects.box.Size = boxSize
+                                espObjects.box.Transparency = Options.PlayerBoxesTransparency.Value
+                                espObjects.box.Filled = Toggles.PlayerBoxFilled.Value
+                                espObjects.box.Position = round(Vector2.new(screenPosition.X, screenPosition.Y) - (boxSize / 2))
+                                espObjects.text.Visible = onScreen and Toggles.PlayerESP.Value
+                                espObjects.text.Position = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), 
+                                ((screenPosition.Y + espObjects.box.Size.Y / 2)))
+                                espObjects.text.Size = Options.PlayerTextSize.Value
+                                espObjects.text.Transparency = Options.PlayerTextTransparency.Value
+                                espObjects.text.Color = Options.PlayerTextColor.Value
+                                espObjects.text.Outline = Toggles.PlayerOutline.Value
+                                if Toggles.UltraStreamerMode.Value then
+                                    espObjects.text.Text = streamerName
+                                else
+                                    espObjects.text.Text = player.Name
+                                end
+                                if Toggles.PlayerDistance.Value then
+                                    espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
+                                end
+                                if Toggles.PlayerHealthbar.Value then
+                                    espObjects.health_main.Color = Options.PlayerHealthbarColor.Value
+                                    espObjects.health_main.Size = Vector2.new(espObjects.box.Size.X / 5, (-espObjects.box.Size.Y * health_percent))
+                                    espObjects.health_main.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
+                                    (espObjects.box.Position.Y + espObjects.box.Size.Y))
+        
+                                    espObjects.health_main.Transparency = Options.PlayerHealthbarTransparency.Value
+                                    espObjects.health_outline.Transparency = Options.PlayerHealthbarTransparency.Value
+                                    espObjects.health_outline.Color = Options.PlayerHealthbarOutlineColor.Value
+                                    espObjects.health_outline.Thickness = Options.PlayerHealthbarOutlineThickness.Value
+                                    espObjects.health_outline.Size = Vector2.new(espObjects.health_main.Size.X, espObjects.box.Size.Y)
+                                    espObjects.health_outline.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
+                                    (espObjects.box.Position.Y))
+                                    espObjects.health_main.Visible = onScreen
+                                    espObjects.health_outline.Visible = espObjects.health_main.Visible
+                                else
+                                    espObjects.health_main.Visible = false
+                                    espObjects.health_outline.Visible = false
+                                end
+                                if Toggles.PlayerHealthText.Value then
+                                    espObjects.text.Text = (espObjects.text.Text .. ("\n|%d/%d|"):format(humanoid.Health, humanoid.MaxHealth))
+                                end
+                                if Toggles.PlayerTracers.Value then
+                                    espObjects.tracer.Transparency = Options.PlayerTracersTransparency.Value
+                                    espObjects.tracer.Thickness = Options.PlayerTracersThickness.Value
+                                    espObjects.tracer.Color = Options.PlayerTracersColor.Value
+                                    espObjects.tracer.From = Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
+                                    espObjects.tracer.To = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), (espObjects.box.Size.Y + espObjects.box.Position.Y))
+                                    espObjects.tracer.Visible = onScreen
+                                else
+                                    espObjects.tracer.Visible = false
+                                end
+                            else
+                                for index, object in next, espObjects do
+                                    object.Visible = false
+                                end
+                            end
+                        end
+                    else
+                        for index, object in next, espObjects do
+                            object.Visible = false
+                        end
+                    end
+                else
+                    for index, object in next, espObjects do
+                        object.Visible = false
+                        object:Remove()
+                        espObjects[index] = nil
+                    end
+                end
+            else
+                for index, object in next, espObjects do
+                    object.Visible = false
+                    object:Remove()
+                    espObjects[index] = nil
+                end
+            end
+        end)
+        Library:GiveSignal(espConnection)
+        runService.Stepped:Connect(function()
+            if not espConnection.Connected then
+                for index, object in next, espObjects do
+                    object.Visible = false
+                    object:Remove()
+                    espObjects[index] = nil
+                end
+            end
+        end)
+    end
+    for _,v in pairs(game:GetService("Workspace").Live:GetChildren()) do
+        esp.drawPlayer(v)
+    end
+    game:GetService("Workspace").Live.ChildAdded:Connect(function(v)
+        esp.drawPlayer(v)
+    end)
+end
