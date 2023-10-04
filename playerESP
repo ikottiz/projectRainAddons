@@ -14,10 +14,6 @@ if getgenv().Rain then
         Text = 'Player ESP',
         NoUI = false,
     })
-    PlayerESP:AddToggle('LocalPlayer', {
-        Text = 'Local ESP',
-        Default = false,
-    })
     PlayerESP:AddLabel("Player ESP Text Color"):AddColorPicker('PlayerTextColor', {
         Default = Color3.fromRGB(255,255,255),
         Title = 'Player ESP Text Color',
@@ -135,6 +131,10 @@ if getgenv().Rain then
         Rounding = 1,
         Compact = false,
     })
+    PlayerESP:AddToggle('Debug', {
+        Text = "Debug(DONT USE THIS!!!WILL SPAM ERRORS!!!)",
+        Default = false,
+    })
 	--variables
 	local streamerNames1 = {"Fancy","Nice","Dumb","Cool","Vainglorious","Funny","Young","Old","Elder","Fat","Skinny"}
 	local streamerNames2 = {"Apple","Brainsucker","Cock","Dawnwalker","Eagle","Furry","Ginger","Hitler","Ion","Joke","Kiddo","Loser","Mother","Nword","Opp","Perv","Quest","Rally","Stuart","T-Rex","University","Vigils","Word","X","You","Zaza"}
@@ -154,6 +154,7 @@ if getgenv().Rain then
 		return Vector2.new(vector.x - vector.x % 1, vector.y - vector.y % 1)
 	end
 	local esp = {}
+    local espPlayers = {}
 	esp.IsAPlayer = function(object)
 		local Parent = object.Parent
 		if Parent then
@@ -176,9 +177,22 @@ if getgenv().Rain then
     end
     --esp
     esp.drawPlayer = function(player)
-        if rainlibrary.Unloaded or player.Name:find("%.") ~= nil then
+        if rainlibrary.Unloaded then
+            return
+        end 
+        if player.Name:find("%.") ~= nil then
+            if Toggles.Debug.Value then
+                rainlibrary:Notify("omw esp error: trying to create esp on a mob:"..player:GetFullName())
+            end
             return
         end
+        if table.find(espPlayers,player) then
+            if Toggles.Debug.Value then
+                rainlibrary:Notify("omw esp error: trying to create esp on a existing player:"..player:GetFullName())
+            end
+            return
+        end
+        table.insert(espPlayers,player)
         local streamerName = math.random(0,9).."_"..streamerNames1[math.random(1,#streamerNames1)]..streamerNames2[math.random(1,#streamerNames2)]
         local espObjects = {}
         espObjects.tracer = draw("Line", {Color = Color3.fromRGB(255, 255, 255), ZIndex = 1, Transparency = 0.5})
@@ -190,12 +204,7 @@ if getgenv().Rain then
             if rainlibrary.Unloaded then
                 return
             end
-            if player and playerExists(player) then
-                if player == localPlayer.Character and not Toggles.LocalPlayer.Value then
-                    for index, object in next, espObjects do
-                        object.Visible = false
-                    end
-                end
+            if player and playerExists(player) and player ~= localPlayer.Character then
                 local humanoid,rootPart = player:FindFirstChildOfClass("Humanoid"),player:FindFirstChild("HumanoidRootPart") or player.PrimaryPart or player:FindFirstChildOfClass("Part")
                 if humanoid and rootPart and humanoid.Health > 0 then
                     local distance = math.floor(localPlayer:DistanceFromCharacter(rootPart.Position))
@@ -210,7 +219,7 @@ if getgenv().Rain then
     
                         if espObjects.box ~= nil then              
                             if Toggles.PlayerESP.Value then
-                                espObjects.box.Visible = onScreen
+                                espObjects.box.Visible = onScreen and Toggles.PlayerBoxes.Value
                                 espObjects.box.Color = Options.PlayerBoxesColor.Value
                                 espObjects.box.Size = boxSize
                                 espObjects.box.Transparency = Options.PlayerBoxesTransparency.Value
@@ -276,6 +285,9 @@ if getgenv().Rain then
                     end
                 else
                     for index, object in next, espObjects do
+                        if Toggles.Debug.Value then
+                            rainlibrary:Notify("omw esp error: trying to create esp on a dead player:"..player:GetFullName())
+                        end
                         object.Visible = false
                         object:Remove()
                         espObjects[index] = nil
@@ -283,6 +295,9 @@ if getgenv().Rain then
                 end
             else
                 for index, object in next, espObjects do
+                    if Toggles.Debug.Value then
+                        rainlibrary:Notify("omw esp error: trying to create esp on a nil:"..player:GetFullName())
+                    end
                     object.Visible = false
                     object:Remove()
                     espObjects[index] = nil
@@ -303,7 +318,9 @@ if getgenv().Rain then
     for _,v in pairs(game:GetService("Workspace").Live:GetChildren()) do
         esp.drawPlayer(v)
     end
-    game:GetService("Workspace").Live.ChildAdded:Connect(function(v)
-        esp.drawPlayer(v)
+    game:GetService("Workspace").Live.ChildAdded:Connect(function()
+        for _,v in pairs(game:GetService("Workspace").Live:GetChildren()) do
+            esp.drawPlayer(v)
+        end
     end)
 end
