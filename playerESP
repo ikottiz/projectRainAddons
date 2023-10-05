@@ -1,7 +1,7 @@
 if getgenv().Rain then
 	--ui
     getgenv().Tabs = {}
-    getgenv().Addon = Addon or getgenv().Rain.Window:AddTab("ESP")
+    getgenv().Addon = Addon or getgenv().Rain.Window:AddTab("More ESP")
     getgenv().PlayerESP = PlayerESP or Addon:AddLeftGroupbox('Player ESP')
     --player esp
     PlayerESP:AddToggle('PlayerESP', {
@@ -159,36 +159,11 @@ if getgenv().Rain then
             end
         end
     end
-	esp.IsAPlayer = function(object)
-		local Parent = object.Parent
-		if Parent then
-			if Parent == game:GetService("Workspace").Live then
-				if object:FindFirstChild("SpawnCF") then 
-					return false
-				end
-                return true
-			end
-			return false
-		end
-		return false
-	end
-    local playerExists = function(player)
-        for i,v in next, cachedServices["Players"]:GetChildren() do
-            if v.Name == player.Name then
-                return true
-            end
-        end
-        return false
-    end
     --esp
     esp.drawPlayer = function(player)
         if rainlibrary.Unloaded then
             return
         end
-        if table.find(espPlayers,player) then
-            return
-        end
-        table.insert(espPlayers,player)
         local streamerName = math.random(0,9).."_"..streamerNames1[math.random(1,#streamerNames1)]..streamerNames2[math.random(1,#streamerNames2)]
         local espObjects = {}
         espObjects.tracer = draw("Line", {Color = Color3.fromRGB(255, 255, 255), ZIndex = 1, Transparency = 0.5})
@@ -280,9 +255,6 @@ if getgenv().Rain then
                         end
                     else
                         for index, object in next, espObjects do
-                            if Toggles.Debug.Value then
-                                rainlibrary:Notify("omw esp error: trying to create esp on a dead player:"..player:GetFullName())
-                            end
                             object.Visible = false
                             object:Remove()
                             espObjects[index] = nil
