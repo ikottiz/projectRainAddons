@@ -27,27 +27,6 @@ if getgenv().Rain then
         Rounding = 0,
         Compact = false,
     })
-    MobESP:AddToggle('MobBoxes', {
-        Text = 'Mob ESP Boxes',
-        Default = false,
-    })
-    MobESP:AddToggle('MobBoxFilled', {
-        Text = 'Mob ESP Boxes Filled',
-        Default = false,
-    })
-    MobESP:AddSlider('MobBoxesTransparency', {
-        Text = 'Mob ESP Boxes Transparency',
-        Default = 1,
-        Min = 0,
-        Max = 1,
-        Rounding = 1,
-        Compact = false,
-    })
-    MobESP:AddLabel("Mob ESP Boxes Color"):AddColorPicker('MobBoxesColor', {
-        Default = Color3.fromRGB(255,255,255),
-        Title = 'Mob ESP Box Color',
-        Transparency = nil,
-    })
     MobESP:AddToggle('MobOutline', {
         Text = 'Mob ESP Text Outline',
         Default = true,
@@ -101,36 +80,6 @@ if getgenv().Rain then
         Rounding = 1,
         Compact = false,
     })
-    MobESP:AddToggle('MobHealthbar', {
-        Text = 'Mobs Healthbar',
-        Default = true,
-    })
-    MobESP:AddLabel("Mob Healthbar Color"):AddColorPicker('MobHealthbarColor', {
-        Default = Color3.fromRGB(90,131,83),
-        Title = 'ESP Text Color',
-        Transparency = nil,
-    })
-    MobESP:AddLabel("Mob Healthbar Outline Color"):AddColorPicker('MobHealthbarOutlineColor', {
-        Default = Color3.fromRGB(255,255,255),
-        Title = 'ESP Text Color',
-        Transparency = nil,
-    })
-    MobESP:AddSlider('MobHealthbarTransparency', {
-        Text = 'Mob Healthbar Transparency',
-        Default = 1,
-        Min = 0,
-        Max = 1,
-        Rounding = 1,
-        Compact = false,
-    })
-    MobESP:AddSlider('MobHealthbarOutlineThickness', {
-        Text = 'Mob Healthbar Outline Thickness',
-        Default = 1,
-        Min = 1,
-        Max = 10,
-        Rounding = 1,
-        Compact = false,
-    })
 	--variables
 	local streamerNames1 = {"Fancy","Nice","Dumb","Cool","Vainglorious","Funny","Young","Old","Elder","Fat","Skinny"}
 	local streamerNames2 = {"Apple","Brainsucker","Cock","Dawnwalker","Eagle","Furry","Ginger","Hitler","Ion","Joke","Kiddo","Loser","Mother","Nword","Opp","Perv","Quest","Rally","Stuart","T-Rex","University","Vigils","Word","X","You","Zaza"}
@@ -174,8 +123,6 @@ if getgenv().Rain then
         espObjects.tracer = draw("Line", {Color = Color3.fromRGB(255, 255, 255), ZIndex = 1, Transparency = 0.5})
         espObjects.text = draw("Text", {Color = Color3.fromRGB(255, 255, 255),Font = 2, Center = true, Outline = true, ZIndex = 1, Size = 13,Transparency = 0.75})
         espObjects.box = draw("Square", {Color = Color3.fromRGB(255, 255, 255), Thickness = 1.5, ZIndex = 1})
-        espObjects.health_main = draw("Square", {Color = Color3.fromRGB(0, 0, 0), Thickness = 1.5, ZIndex = 1, Filled = true})
-        espObjects.health_outline = draw("Square", {Color = Color3.fromRGB(0, 0, 0),ZIndex = 2, Filled = false})
         local espConnection = runService.RenderStepped:Connect(function()
             if mob and esp.IsAMob(mob) then
                 local humanoid,rootPart = mob:FindFirstChildOfClass("Humanoid"),mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart or mob:FindFirstChildOfClass("Part")
@@ -192,11 +139,8 @@ if getgenv().Rain then
     
                         if espObjects.box ~= nil then              
                             if Toggles.MobESP.Value then
-                                espObjects.box.Visible = onScreen and Toggles.MobBoxes.Value
-                                espObjects.box.Color = Options.MobBoxesColor.Value
+                                espObjects.box.Visible = false
                                 espObjects.box.Size = boxSize
-                                espObjects.box.Transparency = Options.MobBoxesTransparency.Value
-                                espObjects.box.Filled = Toggles.MobBoxFilled.Value
                                 espObjects.box.Position = round(Vector2.new(screenPosition.X, screenPosition.Y) - (boxSize / 2))
                                 espObjects.text.Visible = onScreen and Toggles.MobESP.Value
                                 espObjects.text.Position = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), 
@@ -210,25 +154,6 @@ if getgenv().Rain then
                                 espObjects.text.Text = s and ({name:gsub("^%l", s:upper())})[1] or name
                                 if Toggles.MobDistance.Value then
                                     espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
-                                end
-                                if Toggles.MobHealthbar.Value then
-                                    espObjects.health_main.Color = Options.MobHealthbarColor.Value
-                                    espObjects.health_main.Size = Vector2.new(espObjects.box.Size.X / 5, (-espObjects.box.Size.Y * health_percent))
-                                    espObjects.health_main.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
-                                    (espObjects.box.Position.Y + espObjects.box.Size.Y))
-        
-                                    espObjects.health_main.Transparency = Options.MobHealthbarTransparency.Value
-                                    espObjects.health_outline.Transparency = Options.MobHealthbarTransparency.Value
-                                    espObjects.health_outline.Color = Options.MobHealthbarOutlineColor.Value
-                                    espObjects.health_outline.Thickness = Options.MobHealthbarOutlineThickness.Value
-                                    espObjects.health_outline.Size = Vector2.new(espObjects.health_main.Size.X, espObjects.box.Size.Y)
-                                    espObjects.health_outline.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
-                                    (espObjects.box.Position.Y))
-                                    espObjects.health_main.Visible = onScreen
-                                    espObjects.health_outline.Visible = espObjects.health_main.Visible
-                                else
-                                    espObjects.health_main.Visible = false
-                                    espObjects.health_outline.Visible = false
                                 end
                                 if Toggles.MobHealthText.Value then
                                     espObjects.text.Text = (espObjects.text.Text .. ("\n|%d/%d|"):format(humanoid.Health, humanoid.MaxHealth))
@@ -293,7 +218,7 @@ if getgenv().Rain then
         end
     end
     
-    game:GetService("Workspace").Live.ChildAdded:Connect(function(child)
+    mobList.ChildAdded:Connect(function(child)
         if esp.IsAMob(child) then
             child:WaitForChild("Humanoid")
             child:WaitForChild("HumanoidRootPart")
