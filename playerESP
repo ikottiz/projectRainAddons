@@ -131,10 +131,6 @@ if getgenv().Rain then
         Rounding = 1,
         Compact = false,
     })
-    PlayerESP:AddToggle('Debug', {
-        Text = "Debug(DONT USE THIS!!!WILL SPAM ERRORS!!!)",
-        Default = false,
-    })
 	--variables
 	local streamerNames1 = {"Fancy","Nice","Dumb","Cool","Vainglorious","Funny","Young","Old","Elder","Fat","Skinny"}
 	local streamerNames2 = {"Apple","Brainsucker","Cock","Dawnwalker","Eagle","Furry","Ginger","Hitler","Ion","Joke","Kiddo","Loser","Mother","Nword","Opp","Perv","Quest","Rally","Stuart","T-Rex","University","Vigils","Word","X","You","Zaza"}
@@ -155,13 +151,22 @@ if getgenv().Rain then
 	end
 	local esp = {}
     local espPlayers = {}
+    esp.removePlayer = function(player)
+        for i,v in next, espPlayers do
+            if v == player then
+                espPlayers[player] = nil
+                table.remove(espPlayers,i)
+            end
+        end
+    end
 	esp.IsAPlayer = function(object)
 		local Parent = object.Parent
 		if Parent then
 			if Parent == game:GetService("Workspace").Live then
-				if not object:FindFirstChild("SpawnCF") then 
-					return true
+				if object:FindFirstChild("SpawnCF") then 
+					return false
 				end
+                return true
 			end
 			return false
 		end
@@ -179,17 +184,8 @@ if getgenv().Rain then
     esp.drawPlayer = function(player)
         if rainlibrary.Unloaded then
             return
-        end 
-        if player.Name:find("%.") ~= nil then
-            if Toggles.Debug.Value then
-                rainlibrary:Notify("omw esp error: trying to create esp on a mob:"..player:GetFullName())
-            end
-            return
         end
         if table.find(espPlayers,player) then
-            if Toggles.Debug.Value then
-                rainlibrary:Notify("omw esp error: trying to create esp on a existing player:"..player:GetFullName())
-            end
             return
         end
         table.insert(espPlayers,player)
@@ -201,93 +197,100 @@ if getgenv().Rain then
         espObjects.health_main = draw("Square", {Color = Color3.fromRGB(0, 0, 0), Thickness = 1.5, ZIndex = 1, Filled = true})
         espObjects.health_outline = draw("Square", {Color = Color3.fromRGB(0, 0, 0),ZIndex = 2, Filled = false})
         local espConnection = runService.RenderStepped:Connect(function()
-            if rainlibrary.Unloaded then
-                return
-            end
-            if player and playerExists(player) and player ~= localPlayer.Character then
-                local humanoid,rootPart = player:FindFirstChildOfClass("Humanoid"),player:FindFirstChild("HumanoidRootPart") or player.PrimaryPart or player:FindFirstChildOfClass("Part")
-                if humanoid and rootPart and humanoid.Health > 0 then
-                    local distance = math.floor(localPlayer:DistanceFromCharacter(rootPart.Position))
-                    local requiredDistance = Options.PlayerESPDistance.Value
-                    if distance <= requiredDistance then
-                        local screenPosition, onScreen = camera:WorldToViewportPoint(rootPart.Position)
-                        local orientation = rootPart.CFrame
-                        local height = (camera.CFrame - camera.CFrame.Position) * Vector3.new(0, 2.75, 0)
-                        local screenHeight = math.abs(camera:WorldToScreenPoint(orientation.Position + height).Y - camera:WorldToScreenPoint(orientation.Position - height).Y)
-                        local boxSize = round(Vector2.new(screenHeight / 2, screenHeight))
-                        local health_percent = (humanoid.Health / humanoid.MaxHealth)
-    
-                        if espObjects.box ~= nil then              
-                            if Toggles.PlayerESP.Value then
-                                espObjects.box.Visible = onScreen and Toggles.PlayerBoxes.Value
-                                espObjects.box.Color = Options.PlayerBoxesColor.Value
-                                espObjects.box.Size = boxSize
-                                espObjects.box.Transparency = Options.PlayerBoxesTransparency.Value
-                                espObjects.box.Filled = Toggles.PlayerBoxFilled.Value
-                                espObjects.box.Position = round(Vector2.new(screenPosition.X, screenPosition.Y) - (boxSize / 2))
-                                espObjects.text.Visible = onScreen and Toggles.PlayerESP.Value
-                                espObjects.text.Position = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), 
-                                ((screenPosition.Y + espObjects.box.Size.Y / 2)))
-                                espObjects.text.Size = Options.PlayerTextSize.Value
-                                espObjects.text.Transparency = Options.PlayerTextTransparency.Value
-                                espObjects.text.Color = Options.PlayerTextColor.Value
-                                espObjects.text.Outline = Toggles.PlayerOutline.Value
-                                if Toggles.UltraStreamerMode.Value then
-                                    espObjects.text.Text = streamerName
-                                else
-                                    espObjects.text.Text = player.Name
-                                end
-                                if Toggles.PlayerDistance.Value then
-                                    espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
-                                end
-                                if Toggles.PlayerHealthbar.Value then
-                                    espObjects.health_main.Color = Options.PlayerHealthbarColor.Value
-                                    espObjects.health_main.Size = Vector2.new(espObjects.box.Size.X / 5, (-espObjects.box.Size.Y * health_percent))
-                                    espObjects.health_main.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
-                                    (espObjects.box.Position.Y + espObjects.box.Size.Y))
+            if player and player ~= localPlayer then
+                local playerCharacter = player.Character
+                if playerCharacter then
+                    local humanoid,rootPart = playerCharacter:FindFirstChildOfClass("Humanoid"),playerCharacter:FindFirstChild("HumanoidRootPart") or playerCharacter.PrimaryPart or playerCharacter:FindFirstChildOfClass("Part")
+                    if humanoid and rootPart and humanoid.Health > 0 then
+                        local distance = math.floor(localPlayer:DistanceFromCharacter(rootPart.Position))
+                        local requiredDistance = Options.PlayerESPDistance.Value
+                        if distance <= requiredDistance then
+                            local screenPosition, onScreen = camera:WorldToViewportPoint(rootPart.Position)
+                            local orientation = rootPart.CFrame
+                            local height = (camera.CFrame - camera.CFrame.Position) * Vector3.new(0, 2.75, 0)
+                            local screenHeight = math.abs(camera:WorldToScreenPoint(orientation.Position + height).Y - camera:WorldToScreenPoint(orientation.Position - height).Y)
+                            local boxSize = round(Vector2.new(screenHeight / 2, screenHeight))
+                            local health_percent = (humanoid.Health / humanoid.MaxHealth)
         
-                                    espObjects.health_main.Transparency = Options.PlayerHealthbarTransparency.Value
-                                    espObjects.health_outline.Transparency = Options.PlayerHealthbarTransparency.Value
-                                    espObjects.health_outline.Color = Options.PlayerHealthbarOutlineColor.Value
-                                    espObjects.health_outline.Thickness = Options.PlayerHealthbarOutlineThickness.Value
-                                    espObjects.health_outline.Size = Vector2.new(espObjects.health_main.Size.X, espObjects.box.Size.Y)
-                                    espObjects.health_outline.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
-                                    (espObjects.box.Position.Y))
-                                    espObjects.health_main.Visible = onScreen
-                                    espObjects.health_outline.Visible = espObjects.health_main.Visible
+                            if espObjects.box ~= nil then              
+                                if Toggles.PlayerESP.Value then
+                                    espObjects.box.Visible = onScreen and Toggles.PlayerBoxes.Value
+                                    espObjects.box.Color = Options.PlayerBoxesColor.Value
+                                    espObjects.box.Size = boxSize
+                                    espObjects.box.Transparency = Options.PlayerBoxesTransparency.Value
+                                    espObjects.box.Filled = Toggles.PlayerBoxFilled.Value
+                                    espObjects.box.Position = round(Vector2.new(screenPosition.X, screenPosition.Y) - (boxSize / 2))
+                                    espObjects.text.Visible = onScreen and Toggles.PlayerESP.Value
+                                    espObjects.text.Position = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), 
+                                    ((screenPosition.Y + espObjects.box.Size.Y / 2)))
+                                    espObjects.text.Size = Options.PlayerTextSize.Value
+                                    espObjects.text.Transparency = Options.PlayerTextTransparency.Value
+                                    espObjects.text.Color = Options.PlayerTextColor.Value
+                                    espObjects.text.Outline = Toggles.PlayerOutline.Value
+                                    if Toggles.UltraStreamerMode.Value then
+                                        espObjects.text.Text = streamerName
+                                    else
+                                        espObjects.text.Text = player.Name
+                                    end
+                                    if Toggles.PlayerDistance.Value then
+                                        espObjects.text.Text = espObjects.text.Text..("\n|%dm|"):format(distance)
+                                    end
+                                    if Toggles.PlayerHealthbar.Value then
+                                        espObjects.health_main.Color = Options.PlayerHealthbarColor.Value
+                                        espObjects.health_main.Size = Vector2.new(espObjects.box.Size.X / 5, (-espObjects.box.Size.Y * health_percent))
+                                        espObjects.health_main.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
+                                        (espObjects.box.Position.Y + espObjects.box.Size.Y))
+            
+                                        espObjects.health_main.Transparency = Options.PlayerHealthbarTransparency.Value
+                                        espObjects.health_outline.Transparency = Options.PlayerHealthbarTransparency.Value
+                                        espObjects.health_outline.Color = Options.PlayerHealthbarOutlineColor.Value
+                                        espObjects.health_outline.Thickness = Options.PlayerHealthbarOutlineThickness.Value
+                                        espObjects.health_outline.Size = Vector2.new(espObjects.health_main.Size.X, espObjects.box.Size.Y)
+                                        espObjects.health_outline.Position = Vector2.new((espObjects.box.Position.X - (espObjects.box.Thickness +  1)), 
+                                        (espObjects.box.Position.Y))
+                                        espObjects.health_main.Visible = onScreen
+                                        espObjects.health_outline.Visible = espObjects.health_main.Visible
+                                    else
+                                        espObjects.health_main.Visible = false
+                                        espObjects.health_outline.Visible = false
+                                    end
+                                    if Toggles.PlayerHealthText.Value then
+                                        espObjects.text.Text = (espObjects.text.Text .. ("\n|%d/%d|"):format(humanoid.Health, humanoid.MaxHealth))
+                                    end
+                                    if Toggles.PlayerTracers.Value then
+                                        espObjects.tracer.Transparency = Options.PlayerTracersTransparency.Value
+                                        espObjects.tracer.Thickness = Options.PlayerTracersThickness.Value
+                                        espObjects.tracer.Color = Options.PlayerTracersColor.Value
+                                        espObjects.tracer.From = Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
+                                        espObjects.tracer.To = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), (espObjects.box.Size.Y + espObjects.box.Position.Y))
+                                        espObjects.tracer.Visible = onScreen
+                                    else
+                                        espObjects.tracer.Visible = false
+                                    end
                                 else
-                                    espObjects.health_main.Visible = false
-                                    espObjects.health_outline.Visible = false
+                                    for index, object in next, espObjects do
+                                        object.Visible = false
+                                    end
                                 end
-                                if Toggles.PlayerHealthText.Value then
-                                    espObjects.text.Text = (espObjects.text.Text .. ("\n|%d/%d|"):format(humanoid.Health, humanoid.MaxHealth))
-                                end
-                                if Toggles.PlayerTracers.Value then
-                                    espObjects.tracer.Transparency = Options.PlayerTracersTransparency.Value
-                                    espObjects.tracer.Thickness = Options.PlayerTracersThickness.Value
-                                    espObjects.tracer.Color = Options.PlayerTracersColor.Value
-                                    espObjects.tracer.From = Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y)
-                                    espObjects.tracer.To = Vector2.new(((espObjects.box.Size.X / 2) + espObjects.box.Position.X), (espObjects.box.Size.Y + espObjects.box.Position.Y))
-                                    espObjects.tracer.Visible = onScreen
-                                else
-                                    espObjects.tracer.Visible = false
-                                end
-                            else
-                                for index, object in next, espObjects do
-                                    object.Visible = false
-                                end
+                            end
+                        else
+                            for index, object in next, espObjects do
+                                object.Visible = false
                             end
                         end
                     else
                         for index, object in next, espObjects do
+                            if Toggles.Debug.Value then
+                                rainlibrary:Notify("omw esp error: trying to create esp on a dead player:"..player:GetFullName())
+                            end
                             object.Visible = false
+                            object:Remove()
+                            espObjects[index] = nil
                         end
                     end
                 else
+                    esp.removePlayer(player)
                     for index, object in next, espObjects do
-                        if Toggles.Debug.Value then
-                            rainlibrary:Notify("omw esp error: trying to create esp on a dead player:"..player:GetFullName())
-                        end
                         object.Visible = false
                         object:Remove()
                         espObjects[index] = nil
@@ -295,15 +298,13 @@ if getgenv().Rain then
                 end
             else
                 for index, object in next, espObjects do
-                    if Toggles.Debug.Value then
-                        rainlibrary:Notify("omw esp error: trying to create esp on a nil:"..player:GetFullName())
-                    end
                     object.Visible = false
                     object:Remove()
                     espObjects[index] = nil
                 end
             end
         end)
+
         Library:GiveSignal(espConnection)
         runService.Stepped:Connect(function()
             if not espConnection.Connected then
@@ -315,12 +316,32 @@ if getgenv().Rain then
             end
         end)
     end
-    for _,v in pairs(game:GetService("Workspace").Live:GetChildren()) do
-        esp.drawPlayer(v)
-    end
-    game:GetService("Workspace").Live.ChildAdded:Connect(function()
-        for _,v in pairs(game:GetService("Workspace").Live:GetChildren()) do
-            esp.drawPlayer(v)
+    local playerList = players:GetPlayers()
+
+    for index = 1, #playerList do
+        local player = playerList[index]
+        local playerCharacter = player.Character
+
+        if playerCharacter then 
+            if playerCharacter:FindFirstChild("Humanoid") and playerCharacter:FindFirstChild("HumanoidRootPart") then 
+                esp.drawPlayer(player)
+            end
         end
+
+        player.CharacterAdded:Connect(function(character)
+            character:WaitForChild("Humanoid")
+            character:WaitForChild("HumanoidRootPart")
+            wait(1)
+            esp.drawPlayer(player)
+        end)
+    end
+    
+    game:GetService("Players").PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(character)
+            character:WaitForChild("Humanoid")
+            character:WaitForChild("HumanoidRootPart")
+            wait(1)
+            esp.drawPlayer(player)
+        end)
     end)
 end
