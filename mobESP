@@ -81,8 +81,6 @@ if getgenv().Rain then
         Compact = false,
     })
 	--variables
-	local streamerNames1 = {"Fancy","Nice","Dumb","Cool","Vainglorious","Funny","Young","Old","Elder","Fat","Skinny"}
-	local streamerNames2 = {"Apple","Brainsucker","Cock","Dawnwalker","Eagle","Furry","Ginger","Hitler","Ion","Joke","Kiddo","Loser","Mother","Nword","Opp","Perv","Quest","Rally","Stuart","T-Rex","University","Vigils","Word","X","You","Zaza"}
 	local players = cachedServices["Players"]
 	local localPlayer = players.LocalPlayer
 	local camera = workspace.CurrentCamera
